@@ -375,9 +375,18 @@ class MailClient
 		$oBodyStructure = null;
 		$oMessage = false;
 
+		// Search for
+		// protocol="applicaton/pgp-encrypted" -> message MUST contain two parts, second one is encrypted message
+		// protocol="application/pgp-signature" -> message MUST contain two parts, first is data, second is signature
+		// TODO do we want to allow "peeking" only the message body where no signature verification takes place?
+
+		// Content-Type: multipart/signed; micalg=pgp-sha256;
+		// protocol="application/pgp-signature";
+
 		$aBodyPeekMimeIndexes = array();
 		$aSignatureMimeIndexes = array();
 
+		// TODO also fetch ContentType / protocol information for pgp-encrypted
 		$aFetchResponse = $this->oImapClient->Fetch(array(\MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE), $iIndex, $bIndexIsUid);
 		if (0 < \count($aFetchResponse) && isset($aFetchResponse[0]))
 		{

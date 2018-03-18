@@ -850,6 +850,8 @@ class Message
 				}
 			}
 
+			// Set HTML _or_ plaintext
+			// TODO only set these if NOT pgp signed or encrypted!
 			if (0 < \count($aHtmlParts))
 			{
 				$this->sHtml = \implode('<br />', $aHtmlParts);
