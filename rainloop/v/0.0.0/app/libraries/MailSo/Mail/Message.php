@@ -20,6 +20,11 @@ class Message
 	/**
 	 * @var string
 	 */
+	private $sLog;
+
+	/**
+	 * @var string
+	 */
 	private $sFolder;
 
 	/**
@@ -252,6 +257,24 @@ class Message
 	public static function NewInstance()
 	{
 		return new self();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function Log()
+	{
+		return $this->sLog;
+	}
+
+	public function LogObject($sName, $oObject)
+	{
+		$this->sLog = $this->sLog . "\r\n" . $sName . ":" . print_r($oObject, TRUE);
+	}
+
+	public function LogText($sText)
+	{
+		$this->sLog = $this->sLog . "\r\n" . $sText;
 	}
 
 	/**

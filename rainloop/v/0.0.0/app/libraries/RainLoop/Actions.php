@@ -10032,6 +10032,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc TemplatesLink LangLink IncludeBack
 						'FoundedContentLocationUrls' => $mFoundedContentLocationUrls
 					)));
 
+					$mResult['Log'] = $mResponse->Log();
+
 					$mResult['ReadReceipt'] = $mResponse->ReadReceipt();
 					if (0 < \strlen($mResult['ReadReceipt']) && !$mResult['IsReadReceipt'])
 					{
