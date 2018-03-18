@@ -165,6 +165,14 @@ class BodyStructure
 	}
 
 	/**
+	 * return string
+	 */
+	 public function BodyParam($sName)
+	 {
+		 return $this->aBodyParams[$sName];
+	 }
+
+	/**
 	 * return int
 	 */
 	public function Size()

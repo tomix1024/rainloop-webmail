@@ -444,6 +444,35 @@ class MailClient
 			}
 		}
 
+
+		if ($oBodyStructure)
+		{
+			if ($oBodyStructure->ContentType() === 'multipart/signed' && $oBodyStructure->BodyParam('protocol') === 'application/pgp-signature')
+			{
+				// This is a pgp/mime signed message, fetch needed message parts...
+
+				$iBodyIndex = 1;
+				$iSignatureIndex = 2;
+				// TODO verify that this is actually the case! (RFC requires this to be the case)
+				// TODO check content type of signature
+
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY.'['.$iBodyIndex.'.MIME]';
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY.'['.$iBodyIndex.']';
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY.'['.$iSignatureIndex.']';
+			}
+			else if ($oBodyStructure->ContentType() === 'multipart/encrypted' && $oBodyStructure->BodyParam('protocol') === 'application/pgp-encrypted')
+			{
+				$iMetaIndex = 1;
+				$iEncryptedDataIndex = 2;
+				// TODO verify that this is actually the case! (RFC requires this to be the case)
+				// TODO check content type of encrypted data ($first->ContentType === application/pgp-encrypted and $second->ContentType === application/octet-stream)
+
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY.'['.$iMetaIndex.']';
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY.'['.$iEncryptedDataIndex.']';
+			}
+		}
+
+
 		if (!$oBodyStructure)
 		{
 			$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE;
