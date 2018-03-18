@@ -861,6 +861,8 @@ class Message
 				$this->sPlain = \trim(\implode("\n", $aPlainParts));
 			}
 
+			/*
+			// Do not detect signatures or anything here...
 			$aMatch = array();
 			if (\preg_match('/-----BEGIN PGP SIGNATURE-----(.+)-----END PGP SIGNATURE-----/ism', $this->sPlain, $aMatch) && !empty($aMatch[0]))
 			{
@@ -873,27 +875,68 @@ class Message
 			{
 				$this->bPgpEncrypted = true;
 			}
+			*/
 
 			unset($aHtmlParts, $aPlainParts, $aMatch);
 		}
 
-//		if (empty($this->sPgpSignature) && 'multipart/signed' === \strtolower($this->sContentType) &&
-//			'application/pgp-signature' === \strtolower($oHeaders->ParameterValue(
-//				\MailSo\Mime\Enumerations\Header::CONTENT_TYPE,
-//				\MailSo\Mime\Enumerations\Parameter::PROTOCOL
-//			)))
-//		{
-//			$aPgpSignatureParts = $oBodyStructure ? $oBodyStructure->SearchByContentType('application/pgp-signature') : null;
-//			if (\is_array($aPgpSignatureParts) && 0 < \count($aPgpSignatureParts) && isset($aPgpSignatureParts[0]))
-//			{
-//				$sPgpSignatureText = $oFetchResponse->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::BODY.'['.$aPgpSignatureParts[0]->PartID().']');
-//				if (\is_string($sPgpSignatureText) && 0 < \strlen($sPgpSignatureText) && 0 < \strpos($sPgpSignatureText, 'BEGIN PGP SIGNATURE'))
-//				{
-//					$this->sPgpSignature = \trim($sPgpSignatureText);
-//					$this->bPgpSigned = true;
-//				}
-//			}
-//		}
+		if ('multipart/signed' === \strtolower($this->sContentType) &&
+			'application/pgp-signature' === \strtolower($oHeaders->ParameterValue(
+				\MailSo\Mime\Enumerations\Header::CONTENT_TYPE,
+				\MailSo\Mime\Enumerations\Parameter::PROTOCOL
+			)))
+		{
+			// This is a pgp/mime signed message!
+			// TODO
+			$this->bPgpSigned = true;
+
+			// Transfer raw message via new field $this->sPgpMessage?
+			// Or maybe via sPlain? (nah...)
+			// This can contain attachments!
+			// Set $this->sPgpSignature
+
+			$this->sPgpMessage = null;
+			$this->sPgpSignature = null;
+		}
+		else if ('multipart/encrypted' === \strtolower($this->sContentType) &&
+			'application/pgp-encrypted' === \strtolower($oHeaders->ParameterValue(
+				\MailSo\Mime\Enumerations\Header::CONTENT_TYPE,
+				\MailSo\Mime\Enumerations\Parameter::PROTOCOL
+			)))
+		{
+			// This is a pgp/mime encrypted message!
+			// TODO
+			$this->bPgpEncrypted = true;
+			// Transfer encrypted data via $this->sPlain?
+			// NOPE! use $this->sPgpMessage instead. (or not?)
+			// The encrypted data can contain attachments!
+			// The client knows from the bPgp* flags what to do!
+
+			// For now, set $this->sPgpMessage, period.
+
+			$this->sPgpMessage = null;
+		}
+
+		/*
+		// Pre-existing attempt:
+		if (empty($this->sPgpSignature) && 'multipart/signed' === \strtolower($this->sContentType) &&
+			'application/pgp-signature' === \strtolower($oHeaders->ParameterValue(
+				\MailSo\Mime\Enumerations\Header::CONTENT_TYPE,
+				\MailSo\Mime\Enumerations\Parameter::PROTOCOL
+			)))
+		{
+			$aPgpSignatureParts = $oBodyStructure ? $oBodyStructure->SearchByContentType('application/pgp-signature') : null;
+			if (\is_array($aPgpSignatureParts) && 0 < \count($aPgpSignatureParts) && isset($aPgpSignatureParts[0]))
+			{
+				$sPgpSignatureText = $oFetchResponse->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::BODY.'['.$aPgpSignatureParts[0]->PartID().']');
+				if (\is_string($sPgpSignatureText) && 0 < \strlen($sPgpSignatureText) && 0 < \strpos($sPgpSignatureText, 'BEGIN PGP SIGNATURE'))
+				{
+					$this->sPgpSignature = \trim($sPgpSignatureText);
+					$this->bPgpSigned = true;
+				}
+			}
+		}
+		*/
 
 		if ($oBodyStructure)
 		{
